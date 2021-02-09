@@ -3,7 +3,9 @@
 #IEX_CLOUD_API_TOKEN = 'Tpk_7112c5d539334780aa5cd0e569f8e710'
 
 # API Keys and user login info go here
+# From iexcloud.io
 IEX_CLOUD_API_TOKEN = 
+# From Robinhood.com 
 RH_USER_EMAIL = 
 RH_PASSWORD = 
 
