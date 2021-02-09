@@ -16,6 +16,15 @@ from scipy import stats
 market_api_url = 'https://cloud.iexapis.com/stable/stock/market/list'
 stock_api_url = 'https://cloud.iexapis.com/stable/stock'
 
+
+def get_stats(ticker):
+    stats_url = f'{stock_api_url}/{ticker}/advanced-stats?token={IEX_CLOUD_API_TOKEN}'
+    stats = requests.get(stats_url).json()
+    stats_df = pd.DataFrame(stats, index=[0])
+    pd.set_option("display.max_rows", None, "display.max_columns", None)
+
+    return stats_df
+
 def latest_iex_news(ticker):
     "Shows the latest news from the IEX Cloud"
     
@@ -25,12 +34,12 @@ def latest_iex_news(ticker):
     ticker_news_url = f'{stock_api_url}/{ticker}/news/last/5?token={IEX_CLOUD_API_TOKEN}'
     ticker_news = requests.get(ticker_news_url).json()
 
-    # Get the headlines
-    print(f"Headlines for {ticker}")
-    for i in range(len(ticker_news)):
-        print(ticker_news[i]['headline'])
-        # Summary 
-        print("")
+    # Get the headlines [OLD WAY]
+    # print(f"Headlines for {ticker}")
+    # for i in range(len(ticker_news)):
+    #     print(ticker_news[i]['headline'])
+    #     # Summary 
+    #     print("")
 
     # Converts to Dataframe for readability
     # Convert datetime to something humans can easily read
@@ -42,8 +51,10 @@ def latest_iex_news(ticker):
         ticker_news[i]['datetime'] = dt
         print("")
 
+    # Prints as a dataframe
     headlines_df = pd.DataFrame(ticker_news)
-    headlines_df = headlines_df.drop(columns=['image','lang','hasPaywall'])
+    headlines_df = headlines_df.drop(columns=['image','lang','hasPaywall','url','source','related'])
+    pd.set_option("display.max_rows", None)
     print(headlines_df)
     print()
 
@@ -106,7 +117,11 @@ def recommendation_list(ticker):
     "Assortment of recommendations"
     
     # TradingView Recommendations
-    tradingview_recommendation(ticker)
+    # Include error checker since TradingView doesn't always have the ticker
+    try:
+        tradingview_recommendation(ticker)
+    except: 
+        print(f"No recommendations from TradingView for {ticker}")
 
 def largest_trade_information(ticker):
     "Largest Trade Information"
@@ -128,3 +143,49 @@ def largest_trade_information(ticker):
     except:    
         print("Largest Trading Data Unavilable: ", largest_trade)
         print("")
+
+def company_financials(ticker):
+    "Returns financial data from IEX"
+    stats_df = get_stats(ticker)
+    financials_df = stats_df[['marketcap', 'totalCash', 'currentDebt', 'revenue', 'grossProfit', 'totalRevenue']]
+    # Make figures more readable ($1000000 = $1M)
+    financials_df = financials_df[:]/1000000
+
+    print("Financials: \n", financials_df)
+    print("")
+
+def employee_information(ticker):
+    "Employee info: # of employees, earnings per employee"
+    stats_df = get_stats(ticker)
+    employees = stats_df[['employees']]
+    print("Employees: \n", employees)
+    print()
+
+def stock_ratios(ticker):
+    "Commonly used ratios: P/E, EBITDA, Put/Call Ratio"
+    stats_df = get_stats(ticker)
+    ratios = stats_df[['peRatio','EBITDA','putCallRatio']]
+    print("Ratios: \n", ratios)
+    print()
+
+def stock_highlow_price(ticker):
+    "52 Week High/Low Prices"
+    
+    stats_df = get_stats(ticker)
+    high52 = stats_df[['week52high']]
+    print("52-Week High Price: \n", high52)
+    print()
+
+def stock_percent_change(ticker):
+    "Change Percentages"
+
+    stats_df = get_stats(ticker)
+    percent_changes = stats_df[['week52change','day5ChangePercent','day30ChangePercent','month1ChangePercent','month3ChangePercent','month6ChangePercent','year1ChangePercent','year2ChangePercent','year5ChangePercent','maxChangePercent']]
+    # Make it a percent
+    percent_changes = percent_changes[:]*100
+    print("52-Week Percent Change: \n", percent_changes)
+    print()
+
+
+
+print("Done!")
