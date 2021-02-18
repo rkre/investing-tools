@@ -35,11 +35,11 @@ def latest_iex_news(ticker):
     ticker_news = requests.get(ticker_news_url).json()
 
     # Get the headlines [OLD WAY]
-    # print(f"Headlines for {ticker}")
-    # for i in range(len(ticker_news)):
-    #     print(ticker_news[i]['headline'])
-    #     # Summary 
-    #     print("")
+    print(f"Headlines for {ticker}")
+    for i in range(len(ticker_news)):
+        print(ticker_news[i]['url'])
+        # Summary 
+        print("")
 
     # Converts to Dataframe for readability
     # Convert datetime to something humans can easily read
@@ -53,10 +53,20 @@ def latest_iex_news(ticker):
 
     # Prints as a dataframe
     headlines_df = pd.DataFrame(ticker_news)
-    headlines_df = headlines_df.drop(columns=['image','lang','hasPaywall','url','source','related'])
-    pd.set_option("display.max_rows", None)
+    headlines_df = headlines_df.drop(columns=['image','lang','hasPaywall','related'])
+    pd.set_option("display.max_rows", None,"display.max_columns",None)
     print(headlines_df)
+    print(headlines_df['url'])
     print()
+
+def bid_ask_data(ticker):
+    "Gets the bids and asks from IEX"
+    api_url = f'https://cloud.iexapis.com/stable/deep/book?symbols={ticker}&token={IEX_CLOUD_API_TOKEN}'
+    bid_ask_data = requests.get(api_url).json()
+    bid_ask_df = pd.DataFrame(bid_ask_data)
+    pd.set_option("display.max_rows", None,"display.max_columns",None)
+
+    print(bid_ask_data)
 
 def ceo_compensation(ticker):
     "CEO Compensation from IEX Cloud"
@@ -121,7 +131,7 @@ def recommendation_list(ticker):
     try:
         tradingview_recommendation(ticker)
     except: 
-        print(f"No recommendations from TradingView for {ticker}")
+        print(f"No recommendations from TradingView for {ticker} \n")
 
 def largest_trade_information(ticker):
     "Largest Trade Information"
@@ -158,7 +168,9 @@ def employee_information(ticker):
     "Employee info: # of employees, earnings per employee"
     stats_df = get_stats(ticker)
     employees = stats_df[['employees']]
+    revenue_per_employee = stats_df['revenuePerEmployee']
     print("Employees: \n", employees)
+    print("Revenue per Employee: \n", revenue_per_employee)
     print()
 
 def stock_ratios(ticker):
