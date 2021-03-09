@@ -70,7 +70,7 @@ def robinhood_put_option_data(ticker, expiration):
               expirationDate='2021-03-12',optionType='put',info='tradability')
     #option_data_df = pd.DataFrame(option_data)
 
-    option_data = [strike_price, bid_price, ask_price, volume, open_interest, tradability]
+    options_data = [strike_price, bid_price, ask_price, volume, open_interest, tradability]
     
 
     strike_price = [float(i) for i in strike_price] 
@@ -105,19 +105,20 @@ def iex_option_data(ticker, expiration):
     print()
 
 def sell_option_fee_percent(strike_price,fee):
-    fee_percent = [i / j for i, j in zip(fee,strike_price)] 
-    # for i in range(len(strike_price)):
-    #     fee_percent[i] = fee[i]/strike_price[i]
-        #collateral = strike_price*100
-    print(fee_percent)
+    fee_percent = [(i / j)*100 for i, j in zip(fee,strike_price)]
     return fee_percent
 
+def robinhood_latest_price(ticker):
+    return rh.get_latest_price(ticker)
 
 exp_date = next_expiration_date()
-#put_premium_percent(ticker, exp_date)
 strike_price, bid, ask, open_interest, volume = robinhood_put_option_data(ticker,exp_date)
-# strike_price = rh_options.strike_price
-# fee = rh_options.bid_price
-sell_option_fee_percent(strike_price,bid)
+fee_percent = sell_option_fee_percent(strike_price,bid)
+data_tuples = list(zip(fee_percent,strike_price,bid))
+options_data = pd.DataFrame(data_tuples, columns=['Profit %','Strike Price', 'Premium'])
 
+options_data.sort_values(by='Profit %', inplace=True, ascending=False)
+pd.set_option("display.max_rows", None, "display.max_columns", None)
+print(options_data)
+print(robinhood_latest_price(ticker))
 
