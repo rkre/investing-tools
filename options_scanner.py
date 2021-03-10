@@ -1,10 +1,10 @@
 # Scans options based on a watchlist to output expiration dates in order of expiration
 # Calculates % profit for premium fee if selling put
 
-import numpy as np
+#import numpy as np
 import pandas as pd
 import requests #for http requests
-import xlsxwriter
+#import xlsxwriter
 import math
 from secrets import IEX_CLOUD_API_TOKEN, RH_MFA_CODE, RH_PASSWORD, RH_USER_EMAIL
 from scipy import stats
@@ -33,10 +33,14 @@ def next_expiration_date():
             next_exp = next_exp + datetime.timedelta(1)
         else:
             next_exp = next_exp
-    # Format to YYYYMMDD to input into API url in other functions
+
+    # Format to YYYYMMDD to input into IEX API url in other functions
     next_exp_string = next_exp.strftime('%Y%m%d')
-    print('Next options expiration date: ', next_exp_string)
-    return next_exp_string
+    # Format with dashes for Robinhood functions
+    next_exp_string_dashes = next_exp.strftime('%Y-%m-%d')
+
+    print('Next options expiration date: ', next_exp_string_dashes)
+    return next_exp_string, next_exp_string_dashes
 
 def options_expiration_dates(ticker):
     "Find expiration dates for tickers from IEX Cloud (YYMMDD)"
@@ -57,17 +61,17 @@ def robinhood_put_option_data(ticker, expiration):
     robinhood_login()
     
     strike_price = rh.find_options_by_expiration([ticker],
-              expirationDate='2021-03-12',optionType='put',info='strike_price')
+              expirationDate=expiration,optionType='put',info='strike_price')
     bid_price = rh.find_options_by_expiration([ticker],
-              expirationDate='2021-03-12',optionType='put',info='bid_price')
+              expirationDate=expiration,optionType='put',info='bid_price')
     ask_price = rh.find_options_by_expiration([ticker],
-              expirationDate='2021-03-12',optionType='put',info='ask_price')
+              expirationDate=expiration,optionType='put',info='ask_price')
     volume = rh.find_options_by_expiration([ticker],
-              expirationDate='2021-03-12',optionType='put',info='volume')
+              expirationDate=expiration,optionType='put',info='volume')
     open_interest = rh.find_options_by_expiration([ticker],
-              expirationDate='2021-03-12',optionType='put',info='open_interest')
+              expirationDate=expiration,optionType='put',info='open_interest')
     tradability = rh.find_options_by_expiration([ticker],
-              expirationDate='2021-03-12',optionType='put',info='tradability')
+              expirationDate=expiration,optionType='put',info='tradability')
     #option_data_df = pd.DataFrame(option_data)
 
     options_data = [strike_price, bid_price, ask_price, volume, open_interest, tradability]
@@ -109,15 +113,24 @@ def sell_option_fee_percent(strike_price,fee):
     return fee_percent
 
 def robinhood_latest_price(ticker):
-    return rh.get_latest_price(ticker)
+    "Returns float of latest price"
+    price = rh.get_latest_price(ticker)
+    price_float = float(price[0])
+    return price_float
 
-exp_date = next_expiration_date()
-strike_price, bid, ask, open_interest, volume = robinhood_put_option_data(ticker,exp_date)
+exp_date, exp_date_rh = next_expiration_date()
+strike_price, bid, ask, open_interest, volume = robinhood_put_option_data(ticker,exp_date_rh)
 fee_percent = sell_option_fee_percent(strike_price,bid)
 data_tuples = list(zip(fee_percent,strike_price,bid))
-options_data = pd.DataFrame(data_tuples, columns=['Profit %','Strike Price', 'Premium'])
+options_data = pd.DataFrame(data_tuples, columns=['Profit','Strike_Price', 'Premium'])
+latest_price = robinhood_latest_price(ticker)
+options_data.sort_values(by='Strike_Price', inplace=True, ascending=False)
+# for i in range(len(options_data)):
+#     if options_data['Strike Price'][i] > latest_price:
+#         options_data.drop([i])
 
-options_data.sort_values(by='Profit %', inplace=True, ascending=False)
+options_data = options_data[options_data.Strike_Price <= latest_price]
+options_data = options_data[options_data.Profit > 1]
 pd.set_option("display.max_rows", None, "display.max_columns", None)
 print(options_data)
 print(robinhood_latest_price(ticker))
