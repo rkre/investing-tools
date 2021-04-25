@@ -1,3 +1,7 @@
+# Functions included:
+# Latest price (IEX)
+# Latest IEX news
+
 import numpy as np
 import pandas as pd
 import requests #for http requests
