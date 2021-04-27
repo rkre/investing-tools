@@ -3,7 +3,7 @@ import openai
 from secrets import OPENAI_API_TOKEN
 
 #openai.api_key = {OPENAI_API_TOKEN}
-openai.api_key = "sk-IGR8QQSTG3iOLZQyYYC0SAuavVvuMy0Pc4b1eXDw"
+openai.api_key = ""
 
 response = openai.Completion.create(
   engine="davinci",
