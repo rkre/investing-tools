@@ -10,7 +10,7 @@ import math
 import datetime
 import time
 from short_seller_checker import short_seller_checker
-from tradingview_data import tradingview_recommendation
+
 from secrets import IEX_CLOUD_API_TOKEN
 from scipy import stats
 
@@ -113,8 +113,9 @@ def latest_price(ticker):
     # Latest Price
     latest_price_url = f'{stock_api_url}/{ticker}/quote/latestPrice?token={IEX_CLOUD_API_TOKEN}'
     latest_price = requests.get(latest_price_url).json()
-    print("Latest Price: ", latest_price)
-    print("")
+    # print("Latest Price: ", latest_price)
+    # print("")
+    return float(latest_price)
 
     # Market Cap
     # market_cap_url = f'{stock_api_url}/{ticker}/marketcap?token={IEX_CLOUD_API_TOKEN}'
@@ -129,7 +130,7 @@ def short_seller_information(ticker):
 
 def recommendation_list(ticker):
     "Assortment of recommendations"
-    
+    from tradingview_data import tradingview_recommendation
     # TradingView Recommendations
     # Include error checker since TradingView doesn't always have the ticker
     try:

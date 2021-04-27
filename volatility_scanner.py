@@ -13,7 +13,6 @@ from secrets import IEX_CLOUD_API_TOKEN
 import numpy as np
 import pandas as pd
 import requests #for http requests
-from stock_scanner import latest_price
 
 
 # Function to find closing price 
@@ -21,6 +20,7 @@ from stock_scanner import latest_price
 
 # Getting the following from the IEX API
 # https://cloud.iexapis.com/ 
+
 market_api_url = 'https://cloud.iexapis.com/stable/stock/market/list'
 stock_api_url = 'https://cloud.iexapis.com/stable/stock'
 
@@ -66,12 +66,12 @@ def lowest_price(ticker):
     lowest_price = prices.nsmallest(2,"high")
     return lowest_price
 
-ticker = 'MSFT'
-highlow = highest_volatility(ticker)
-print(latest_price(ticker))
-print(highest_price(ticker))
-print(lowest_price(ticker))
-print(highlow)
+# ticker = 'MSFT'
+# highlow = highest_volatility(ticker)
+
+# print(highest_price(ticker))
+# print(lowest_price(ticker))
+# print(highlow)
 
 
 
