@@ -13,6 +13,7 @@ from secrets import IEX_CLOUD_API_TOKEN
 import numpy as np
 import pandas as pd
 import requests #for http requests
+from stock_scanner import latest_price
 
 
 # Function to find closing price 
@@ -36,7 +37,6 @@ def get_daily_highlows(ticker):
     "Gets the max and min price for the day"
     year_data = get_1yr_data(ticker)
     highlows = year_data[['date','high','low']]
-
     return highlows
 
 def daily_volatility(ticker):
@@ -45,13 +45,32 @@ def daily_volatility(ticker):
     points_change = highlows['high'].sub(highlows['low'])
     highlows.insert(3,"points",points_change)
     percent_change = points_change.div(highlows['low'])*100
-
     highlows.insert(4,"%",percent_change)
-
     return highlows
 
+def highest_volatility(ticker):
+    "Returns the date annd prices for the highest volatility of a stock"
+    highlows = daily_volatility(ticker)
+    highest_vol = highlows.nlargest(5,"%")
+    return highest_vol
 
-highlow = daily_volatility('MSFT')
+def highest_price(ticker):
+    "Returns highest price in a given time period"
+    prices = get_daily_highlows(ticker)
+    highest_price = prices.nlargest(2,"high")
+    return highest_price
+
+def lowest_price(ticker):
+    "Returns lowest price in a given time period"
+    prices = get_daily_highlows(ticker)
+    lowest_price = prices.nsmallest(2,"high")
+    return lowest_price
+
+ticker = 'MSFT'
+highlow = highest_volatility(ticker)
+print(latest_price(ticker))
+print(highest_price(ticker))
+print(lowest_price(ticker))
 print(highlow)
 
 
