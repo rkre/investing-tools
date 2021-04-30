@@ -12,7 +12,7 @@ import volatility_scanner as vs
 market_api_url = 'https://cloud.iexapis.com/stable/stock/market/list'
 stock_api_url = 'https://cloud.iexapis.com/stable/stock'
 
-def iron_corridor(ticker):
+def iron_condor(ticker):
     "Iron corridor strike price calculator"
     # Current price of the stock
     current_price = latest_price(ticker)
@@ -37,8 +37,8 @@ def iron_corridor(ticker):
     IC_strikes = [sell_put_strike, buy_put_strike, sell_call_strike, buy_call_strike]
     return IC_strikes
 
-ticker = 'MSFT'
-IC_strikes = iron_corridor(ticker)
+ticker = 'CAT'
+IC_strikes = iron_condor(ticker)
 print(IC_strikes)
 print("Current price: ", latest_price(ticker))
     

@@ -23,6 +23,7 @@ from stock_scanner import latest_price
 ticker = 'CAT'
 
 
+
 def next_expiration_date():
     today = datetime.date.today()
     print("Today's date:", today)
@@ -50,6 +51,7 @@ def options_expiration_dates(ticker):
     api_url = f'https://cloud.iexapis.com/stable/stock/{ticker}/options/?token={IEX_CLOUD_API_TOKEN}'
     data = requests.get(api_url).json()
     print(data)
+    return data
 
 def expiring_this_week(ticker):
     "Outputs tickers that are expiring this week"
@@ -147,7 +149,7 @@ def put_credit_spread(ticker, exp_date_rh):
 
     min_risk_profit = [(i-j) for i, j in zip(sell_put_fee, buy_put_fee)]
     
-    print(min_risk_profit)
+    #print(min_risk_profit)
     options_data.insert(3,"Put Profit",min_risk_profit)
 
     print("Iron Condor \n Put Sell-Buy Profit List")
@@ -178,24 +180,24 @@ def call_credit_spread(ticker, exp_date_rh):
 
     min_risk_profit = [(i-j) for i, j in zip(sell_call_fee, buy_call_fee)]
     
-    print(min_risk_profit)
+    #print(min_risk_profit)
     options_data.insert(3,"Call Profit",min_risk_profit)
 
     print("Iron Condor \n Call Sell-Buy Profit List")
     print(options_data)
     return options_data
 
-def iron_condor_profit_checker(ticker):
+def iron_condor_profit_checker(ticker, exp_date):
     "Checks premium profit if buying/selling puts and calls"
-    exp_date, exp_date_rh = next_expiration_date()
+    #exp_date, exp_date_rh = next_expiration_date()
 
-    puts = put_credit_spread(ticker, exp_date_rh)
-    calls = call_credit_spread(ticker, exp_date_rh)
+    puts = put_credit_spread(ticker, exp_date)
+    calls = call_credit_spread(ticker, exp_date)
 
     print("***************")
-    print(puts)
-    print(calls)
-    print(latest_price(ticker))
+    #print(puts)
+    #print(calls)
+    print("Latest price: ", latest_price(ticker))
     print(robinhood_latest_price(ticker))
 
 
@@ -272,6 +274,32 @@ def sell_call_list(ticker):
     print(options_data)
     print(robinhood_latest_price(ticker))
 
+def select_exp_date(ticker):
+    "User selects exp date from list of available expiration dates"
+    exp_dates = options_expiration_dates(ticker)
+    # Organize list of expiration dates and format into Robinhood exp format
+    print("List of options expirations dates for ", ticker)
+    n = 0
+    exp_date_formatted = []
+    for day in exp_dates:
+        # Format with dashes for Robinhood functions
+        dt_convert = datetime.datetime.strptime(day, '%Y%m%d')
+        exp_date_formatted.append(dt_convert.strftime('%Y-%m-%d'))
+        print(n, exp_date_formatted[n])
+        n = n+1
+    else:
+        print("")
+
+    print("Select expiration date [ 0 -", n-1, "]")
+    date_selected = input("Selection: ")
+
+    print("Selected ", exp_date_formatted[int(date_selected)])
+
+
+    return exp_date_formatted[int(date_selected)]
+
 #sell_put_list(ticker)
 #sell_call_list(ticker)
-iron_condor_profit_checker(ticker)
+selected_exp_date = select_exp_date(ticker)
+iron_condor_profit_checker(ticker, selected_exp_date)
+#options_expiration_dates(ticker)
