@@ -302,5 +302,22 @@ def select_exp_date(ticker):
 #sell_put_list(ticker)
 #sell_call_list(ticker)
 selected_exp_date = select_exp_date(ticker)
-iron_condor_profit_checker(ticker, selected_exp_date)
+
+print(" 1 - Sell Put ")
+print(" 2 - Put Spread ")
+print(" 3 - Call Spread ")
+print(" 4 - Iron Condor ")
+strategy = input("Select strategy: ")
+
+if strategy == '1':
+    sell_put_list(ticker)
+elif strategy == '2':
+    put_credit_spread(ticker, selected_exp_date)
+elif strategy == '3':
+    call_credit_spread(ticker, selected_exp_date)
+elif strategy == '4':
+    iron_condor_profit_checker(ticker, selected_exp_date)
+else:
+    print("Error")
 #options_expiration_dates(ticker)
+print(robinhood_latest_price(ticker))
