@@ -20,7 +20,8 @@ from stock_scanner import latest_price
 # Upload or input watchlist/tickers from CSV file
 
 #stocks = pd.read_csv('genomics_stocks.csv')
-ticker = 'CAT'
+#ticker = 'CAT'
+ticker = input("Enter ticker: ")
 
 
 
@@ -50,7 +51,7 @@ def options_expiration_dates(ticker):
     "Find expiration dates for tickers from IEX Cloud (YYMMDD)"
     api_url = f'https://cloud.iexapis.com/stable/stock/{ticker}/options/?token={IEX_CLOUD_API_TOKEN}'
     data = requests.get(api_url).json()
-    print(data)
+    
     return data
 
 def expiring_this_week(ticker):
