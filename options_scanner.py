@@ -76,25 +76,39 @@ def robinhood_put_option_data(ticker, expiration):
               expirationDate=expiration,optionType='put',info='bid_price')
     ask_price = rh.find_options_by_expiration([ticker],
               expirationDate=expiration,optionType='put',info='ask_price')
-    volume = rh.find_options_by_expiration([ticker],
-              expirationDate=expiration,optionType='put',info='volume')
-    open_interest = rh.find_options_by_expiration([ticker],
-              expirationDate=expiration,optionType='put',info='open_interest')
-    tradability = rh.find_options_by_expiration([ticker],
-              expirationDate=expiration,optionType='put',info='tradability')
-    #option_data_df = pd.DataFrame(option_data)
+    # volume = rh.find_options_by_expiration([ticker],
+    #           expirationDate=expiration,optionType='put',info='volume')
+    # open_interest = rh.find_options_by_expiration([ticker],
+    #           expirationDate=expiration,optionType='put',info='open_interest')
+    # tradability = rh.find_options_by_expiration([ticker],
+    #           expirationDate=expiration,optionType='put',info='tradability')
+    # #option_data_df = pd.DataFrame(option_data)
 
-    options_data = [strike_price, bid_price, ask_price, volume, open_interest, tradability]
+    # put_list = rh.find_options_by_expiration([ticker],
+    #           expirationDate=expiration,optionType='put')
+    # strike_price = put_list[:]['strike_price']
+    # bid_price = put_list[:]['bid_price']
+    # ask_price = put_list[:]['ask_price']
+    # volume = put_list[:]['volume']
+    # open_interest = put_list[:]['open_interest']
+    # tradability = put_list[:]['tradability']
+    
+
+    # print("!!!!!!!!!!!!!!", put_list)
+    # print(strike_price)
+    # print("")
+
+    options_data = [strike_price, bid_price, ask_price]
     
 
     strike_price = [float(i) for i in strike_price] 
     bid_price = [float(i) for i in bid_price] 
     ask_price = [float(i) for i in ask_price] 
-    open_interest = [float(i) for i in open_interest] 
-    volume = [float(i) for i in volume] 
+    # open_interest = [float(i) for i in open_interest] 
+    # volume = [float(i) for i in volume] 
     mid_price = [(i + j)/2 for i, j in zip(bid_price,ask_price)]
    
-    return(strike_price,bid_price,ask_price,mid_price,open_interest,volume)
+    return(strike_price,bid_price,ask_price,mid_price)
     
 
 def robinhood_call_option_data(ticker, expiration):
@@ -129,31 +143,42 @@ def robinhood_call_option_data(ticker, expiration):
 def put_credit_spread(ticker, exp_date_rh):
     "Put Table with sell-buy put profit calculated"
     # Put Option Table 
-    strike_price, bid, ask, mid, open_interest, volume = robinhood_put_option_data(ticker,exp_date_rh)
+    print("Loading from Rohinhood...")
+    strike_price, bid, ask, mid = robinhood_put_option_data(ticker,exp_date_rh)  
     
     data_tuples = list(zip(strike_price,mid))
+    print("Converting data tuples")
 
     # Min Risk Profit is the profit received if buying and selling two closest puts
-    options_data = pd.DataFrame(data_tuples, columns=['Strike_Price', 'Sell Put'])
+    options_data = pd.DataFrame(data_tuples, columns=['Strike_Price', 'Sell_Put'])
     latest_price = robinhood_latest_price(ticker)
     options_data = options_data[options_data.Strike_Price <= latest_price]
+
+    # Cut the .01 priced options
+    cutoff = .01
+    options_data = options_data[options_data.Sell_Put > cutoff]
     options_data.sort_values(by='Strike_Price', inplace=True, ascending=False)
 
+    
+
+
     # Add sell/buy put fee column
-    sell_put_fee = options_data["Sell Put"]
+    sell_put_fee = options_data["Sell_Put"]
     # Add column for buy put fee
     buy_put_fee = sell_put_fee[1:]
 
-    options_data.insert(2,"Buy Put",buy_put_fee)
-    options_data["Buy Put"] = options_data['Buy Put'].shift(-1)
+    options_data.insert(2,"Buy_Put",buy_put_fee)
+    options_data["Buy_Put"] = options_data['Buy_Put'].shift(-1)
     options_data = options_data[:-1]
 
     min_risk_profit = [(i-j) for i, j in zip(sell_put_fee, buy_put_fee)]
     
     #print(min_risk_profit)
-    options_data.insert(3,"Put Profit",min_risk_profit)
+    options_data.insert(3,"Put_Profit",min_risk_profit)
+    cutoff = 0.1
+    options_data = options_data[options_data.Put_Profit > cutoff]
 
-    print("Iron Condor \n Put Sell-Buy Profit List")
+    print(" \nPut Sell-Buy Profit List")
     print(options_data)
     return options_data
 
@@ -169,6 +194,11 @@ def call_credit_spread(ticker, exp_date_rh):
     latest_price = robinhood_latest_price(ticker)
     options_data = options_data[options_data.Strike_Price >= latest_price]
     options_data.sort_values(by='Strike_Price', inplace=True, ascending=True)
+
+    # Cut the .01 priced options
+    cutoff = .02
+    options_data.loc[options_data["Sell Call"] > cutoff]
+
 
     # Add sell/buy call fee column
     sell_call_fee = options_data["Sell Call"]
@@ -320,4 +350,6 @@ elif strategy == '4':
 else:
     print("Error")
 #options_expiration_dates(ticker)
-print(robinhood_latest_price(ticker))
+print("Ticker: ", ticker)
+print("Latest price: ", robinhood_latest_price(ticker))
+print(selected_exp_date)
