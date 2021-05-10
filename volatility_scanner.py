@@ -66,7 +66,9 @@ def lowest_price(ticker):
     lowest_price = prices.nsmallest(1,"high")
     return lowest_price.iloc[0,2]
 
-ticker = 'CAT'
+print("\nVolatility Scanner!")
+ticker = input("Enter ticker: ")
+
 highlow = highest_volatility(ticker)
 
 print(highest_price(ticker))

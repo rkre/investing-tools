@@ -9,7 +9,7 @@ import math
 import datetime
 import time
 from short_seller_checker import short_seller_checker
-from tradingview_data import tradingview_recommendation
+#from tradingview_data import tradingview_recommendation
 from secrets import IEX_CLOUD_API_TOKEN
 from scipy import stats
 

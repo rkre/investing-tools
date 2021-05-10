@@ -143,7 +143,7 @@ def robinhood_call_option_data(ticker, expiration):
 def put_credit_spread(ticker, exp_date_rh):
     "Put Table with sell-buy put profit calculated"
     # Put Option Table 
-    print("Loading from Rohinhood...")
+    print("Loading from Robinhood...")
     strike_price, bid, ask, mid = robinhood_put_option_data(ticker,exp_date_rh)  
     
     data_tuples = list(zip(strike_price,mid))
@@ -175,7 +175,8 @@ def put_credit_spread(ticker, exp_date_rh):
     
     #print(min_risk_profit)
     options_data.insert(3,"Put_Profit",min_risk_profit)
-    cutoff = 0.1
+    # Cutoff algo function goes here
+    cutoff = 1.0
     options_data = options_data[options_data.Put_Profit > cutoff]
 
     print(" \nPut Sell-Buy Profit List")
@@ -329,8 +330,48 @@ def select_exp_date(ticker):
 
     return exp_date_formatted[int(date_selected)]
 
-#sell_put_list(ticker)
-#sell_call_list(ticker)
+def option_table_profit_cutoff(exp_date):
+    "Returns a cutoff factor based on how far the exp date is from today. Used to make quick profit analysis decisions"
+
+    #Find today's date
+    today = datetime.date.today()
+    print("Today's date:", today)
+
+    # Calculate how many days until expiration
+    days_til_expiry = exp_date - today
+
+    # If expiring this week, factor of 1
+
+    
+    next_exp = today
+    count = 0
+    while count != 6:
+        count += 1
+        if next_exp.weekday() < 4:
+            next_exp = next_exp + datetime.timedelta(1)
+        if next_exp.weekday() > 4:
+            next_exp = next_exp + datetime.timedelta(1)
+        else:
+            next_exp = next_exp
+
+    # Format to YYYYMMDD to input into IEX API url in other functions
+    next_exp_string = next_exp.strftime('%Y%m%d')
+    # Format with dashes for Robinhood functions
+    next_exp_string_dashes = next_exp.strftime('%Y-%m-%d')
+
+    print('Next options expiration date: ', next_exp_string_dashes)
+    return next_exp_string, next_exp_string_dashes
+
+def max_loss(strategy, credit, sell_strike_price, buy_strike_price):
+    "Calculates the max loss from a strategy"
+
+def collateral_calc(credit, sell_strike_price, buy_strike_price):
+    "Calculates the collateral needed for the trade based on the credit received and strike price or prices if strategy is a spread"
+
+
+
+
+#######################
 selected_exp_date = select_exp_date(ticker)
 
 print(" 1 - Sell Put ")
