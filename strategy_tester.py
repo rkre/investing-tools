@@ -1,5 +1,14 @@
 # To test strategies with historical data
+import numpy as np
+import pandas as pd
+import requests #for http requests
+import xlsxwriter
+import math
+import datetime
 
+
+from secrets import IEX_CLOUD_API_TOKEN
+from scipy import stats
 
 
 # Enter ticker or ticker list
