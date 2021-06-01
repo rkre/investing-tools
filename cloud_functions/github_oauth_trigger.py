@@ -11,7 +11,7 @@ def hello_firestore(event, context):
 
     import requests
     url = 'https://github.com/login/device/code'
-    client_id = 'a5d9051591605e605159'
+    client_id = ''
     scope = 'repo'
     data = {'client_id': client_id,
             'scope': scope}     
