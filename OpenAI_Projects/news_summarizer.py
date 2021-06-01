@@ -3,7 +3,7 @@ import secrets
 from urllib.request import Request, urlopen
 
 #response = openai.Completion.create(engine="davinci", prompt="My cat likes to", max_tokens=10)
-openai.api_key = 'sk-IGR8QQSTG3iOLZQyYYC0SAuavVvuMy0Pc4b1eXDw'
+
 #openai.api_key = os.environ["OPENAI_API_KEY"]
 
 url = f'https://investors.beamtx.com/node/7006'
