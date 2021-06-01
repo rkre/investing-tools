@@ -6,15 +6,9 @@ import xlsxwriter
 import math
 import datetime
 import os
-
-
 from secrets import IEX_CLOUD_API_TOKEN
 from scipy import stats
 import csv
-
-
-# Enter ticker or ticker list
-
 
 
 

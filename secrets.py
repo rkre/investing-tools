@@ -4,10 +4,10 @@
 
 # API Keys and user login info go here
 # From iexcloud.io
-IEX_CLOUD_API_TOKEN = 
+IEX_CLOUD_API_TOKEN = 'pk_0bf6004dc0954e43801956840499a130'
 # From Robinhood.com 
-RH_USER_EMAIL = 
-RH_PASSWORD = 
+RH_USER_EMAIL = 'rkreynin@gmail.com' 
+RH_PASSWORD = ',./XmasSteps1812r'
 
 # This code is generated if you do MFA/2FA with an authenticator app for Robinhood
-RH_MFA_CODE = 
+RH_MFA_CODE = 'MTUC7RV4S2ICBYQE'
