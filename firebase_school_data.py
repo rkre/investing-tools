@@ -13,7 +13,7 @@ default_app = firebase_admin.initialize_app()
 
 
 headers = {
-    'x-rapidapi-key': "017c5e2659msh582cb5f1afa0068p172a78jsna5005d1fcd27",
+    'x-rapidapi-key': "",
     'x-rapidapi-host': "universities-and-colleges.p.rapidapi.com"
     }
 
