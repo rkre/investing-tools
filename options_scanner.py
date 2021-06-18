@@ -145,7 +145,10 @@ def put_credit_spread(ticker, exp_date_rh):
     # Put Option Table 
     print("Loading from Robinhood...")
     strike_price, bid, ask, mid = robinhood_put_option_data(ticker,exp_date_rh)  
-    
+    sell_strikes = strike_price
+    buy_strikes = strike_price[1:]
+    #collat = [sell_strikes[i] - buy_strikes[i] for i in ]
+    #print(collat)
     data_tuples = list(zip(strike_price,mid))
     print("Converting data tuples")
 
@@ -160,24 +163,51 @@ def put_credit_spread(ticker, exp_date_rh):
     options_data.sort_values(by='Strike_Price', inplace=True, ascending=False)
 
     
-
-
-    # Add sell/buy put fee column
+    # Create a Sell Put Table and a Buy Put Table
     sell_put_fee = options_data["Sell_Put"]
-    # Add column for buy put fee
+    sell_put_strikes = options_data["Strike_Price"]
+    buy_put_strikes = sell_put_strikes[1:]
     buy_put_fee = sell_put_fee[1:]
+    #print("Sell Put List", sell_put_df)
+    #print("Buy Put List", buy_put_df)
+    options_data.insert(1,"Buy_Strike", buy_put_strikes)
+    options_data["Buy_Strike"] = options_data['Buy_Strike'].shift(-1)
 
-    options_data.insert(2,"Buy_Put",buy_put_fee)
+    options_data.insert(3,"Buy_Put",buy_put_fee)
     options_data["Buy_Put"] = options_data['Buy_Put'].shift(-1)
     options_data = options_data[:-1]
 
     min_risk_profit = [(i-j) for i, j in zip(sell_put_fee, buy_put_fee)]
+    put_credit = [i*100.0*100.0 for i in min_risk_profit]
+    risk = [((i-j-k)) for i, j, k in zip(sell_put_strikes, buy_put_strikes, min_risk_profit)]
+    risk_p = [i*100.0*100.0 for i in risk]
+    options_data["Collateral"] = risk_p
+    options_data = options_data[options_data.Collateral > 0.0]
+    risk_p = options_data["Collateral"]
+    options_data.insert(4,"Put_Profit", put_credit)
+    options_data = options_data[options_data.Put_Profit > 0.0]
+    put_credit = options_data["Put_Profit"]
+    print("credit", put_credit)
+    print("risk", risk_p)
+
+    profit_percent = [100.0/float(float(i)//float(j)) for i, j in zip(risk_p, put_credit)]
     
     #print(min_risk_profit)
-    options_data.insert(3,"Put_Profit",min_risk_profit)
+    options_data.insert(5,"Percent_Profit", profit_percent)
     # Cutoff algo function goes here
-    cutoff = 1.0
-    options_data = options_data[options_data.Put_Profit > cutoff]
+    #cutoff = 1.0
+    #options_data = options_data[options_data.Put_Profit > cutoff]
+
+
+    # Collateral/Max Loss
+    
+    options_data["Collateral"] = risk_p #options_data["Strike_Price"] - buy_put_df["Strike_Price"]
+    # collateral = float(sell_put_df["Strike_Price"]) - float(buy_put_df["Strike_Price"])
+    # print('COLLAT\n', sell_put_df)
+    # print(buy_put_df)
+    # print(collateral)
+    options_data = options_data[options_data.Percent_Profit > 5.0]
+
 
     print(" \nPut Sell-Buy Profit List")
     print(options_data)
